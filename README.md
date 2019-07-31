@@ -1,6 +1,11 @@
 # auto-ender
 Mod for Software Inc. game which allows you to auto-end the design and development phase of a project.
 
+## Description
+It will skip the design and development phase of a project if it is a contract and has code and art units as soon as they are fullfilled, so you don't waste time and money.
+It allows you to speed-up the initial phase of the game where you only work on contracts or even build a highly efficient outsourcing company.
+*Note: it won't skip the bug fixing phase, that is left up to you to decide when to stop.*
+
 ## Install notes
 Download a stable release from [here](https://github.com/mladjo97/auto-ender/releases) and copy the mod folder to the *DLLMods* folder.
 
