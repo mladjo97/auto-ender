@@ -8,8 +8,7 @@ namespace AutoEnder
     public class AutoEnderBehaviour : ModBehaviour
     {
         private bool _isActive = false;
-        private const float _artDifference = 1.36f;
-        private readonly Timer _timer = new Timer(1000);
+        private readonly Timer _timer = new Timer(250);
 
         public override void OnActivate()
         {
@@ -17,7 +16,7 @@ namespace AutoEnder
             _isActive = true;
 
             /*
-             * Set the timer to be invoked for project update
+             *  Set the timer to be invoked for project update
              */
             _timer.Elapsed += UpdateProjects;
             _timer.AutoReset = true;
@@ -53,8 +52,7 @@ namespace AutoEnder
                     designDocument.PromoteAction();
                 }
             }
-
-
+            
             /*
              *  Auto-end (skip) the alpha phase for contract projects
              */
@@ -64,17 +62,18 @@ namespace AutoEnder
             {
                 if (!alpha.InBeta && !alpha.InDelay && alpha.contract != null)
                 {
-                    if (alpha.CodeProgress >= alpha.contract.CodeUnits && alpha.ArtProgress >= alpha.contract.ArtUnits)
-                    {
-                        alpha.PromoteAction();
-                    }
                     /*
-                     * Because art asset contracts don't have any code requirements 
-                     */
-                    else if (alpha.contract.CodeUnits < 1 && alpha.ArtProgress >= (alpha.contract.ArtUnits - _artDifference))
+                    *   There are different multipliers applied on more complex projects
+                    *   so there are different calculations for unit progress
+                    */
+                    float actualCodeProgress = alpha.CodeProgress * alpha.CodeDevTime;
+                    float actualArtProgress = alpha.ArtProgress * alpha.ArtDevTime;
+
+                    if (actualCodeProgress >= alpha.contract.CodeUnits && actualArtProgress >= alpha.contract.ArtUnits)
                     {
                         alpha.PromoteAction();
                     }
+
                 }
             }
 
