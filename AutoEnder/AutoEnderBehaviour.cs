@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Timers;
-using System.Diagnostics;
 using System.Collections.Generic;
-
 
 namespace AutoEnder
 {
@@ -14,9 +11,11 @@ namespace AutoEnder
 
         public override void OnActivate()
         {
-            Debug.WriteLine("Activating");
             _isActive = true;
 
+            /*
+             * Set the timer to be invoked for project update
+             */
             _timer.Elapsed += UpdateProjects;
             _timer.AutoReset = true;
             _timer.Start();
@@ -30,8 +29,6 @@ namespace AutoEnder
 
         private void UpdateProjects(object sender, ElapsedEventArgs e)
         {
-            Console.WriteLine("Updating projects");
-
             if (!_isActive
                 || GameSettings.Instance == null
                 || GameSettings.Instance.MyCompany == null
@@ -40,6 +37,9 @@ namespace AutoEnder
                 return;
             }
 
+            /*
+             *  Auto-end (skip) the design phase for all projects
+             */
             SHashSet<WorkItem> workItems = GameSettings.Instance.MyCompany.WorkItems;
             IEnumerable<DesignDocument> designDocuments = workItems.OfType<DesignDocument>().ToList();
 
@@ -47,8 +47,29 @@ namespace AutoEnder
             {
                 if (designDocument.HasFinished && !designDocument.Done)
                 {
-                    Debug.WriteLine("Finishing design phase");
                     designDocument.PromoteAction();
+                }
+            }
+
+
+            /*
+             *  Auto-end (skip) the alpha phase for contract projects
+             */
+            IEnumerable<SoftwareAlpha> alphaPhase = workItems.OfType<SoftwareAlpha>().ToList();
+
+            foreach (var alpha in alphaPhase)
+            {
+                if (!alpha.InBeta && !alpha.InDelay && alpha.contract != null)
+                {
+                    if(alpha.CodeProgress >= alpha.contract.CodeUnits && alpha.ArtProgress >= alpha.contract.ArtUnits)
+                    {
+                        alpha.PromoteAction();
+                    }
+
+                    if(alpha.contract.SoftwareType == "Game Assets")
+                    {
+                        alpha.PromoteAction();
+                    }
                 }
             }
 
