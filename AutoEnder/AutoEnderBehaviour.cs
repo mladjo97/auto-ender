@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using DevConsole;
+using System.Linq;
 using System.Timers;
 using System.Collections.Generic;
 
@@ -7,10 +8,12 @@ namespace AutoEnder
     public class AutoEnderBehaviour : ModBehaviour
     {
         private bool _isActive = false;
-        private readonly Timer _timer = new Timer(250);
+        private const float _artDifference = 1.36f;
+        private readonly Timer _timer = new Timer(1000);
 
         public override void OnActivate()
         {
+            Console.LogInfo("Activated Auto-Ender by github.com/mladjo97");
             _isActive = true;
 
             /*
@@ -61,12 +64,14 @@ namespace AutoEnder
             {
                 if (!alpha.InBeta && !alpha.InDelay && alpha.contract != null)
                 {
-                    if(alpha.CodeProgress >= alpha.contract.CodeUnits && alpha.ArtProgress >= alpha.contract.ArtUnits)
+                    if (alpha.CodeProgress >= alpha.contract.CodeUnits && alpha.ArtProgress >= alpha.contract.ArtUnits)
                     {
                         alpha.PromoteAction();
                     }
-
-                    if(alpha.contract.SoftwareType == "Game Assets")
+                    /*
+                     * Because art asset contracts don't have any code requirements 
+                     */
+                    else if (alpha.contract.CodeUnits < 1 && alpha.ArtProgress >= (alpha.contract.ArtUnits - _artDifference))
                     {
                         alpha.PromoteAction();
                     }
