@@ -1,58 +1,54 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Timers;
+using System.Diagnostics;
+using System.Collections.Generic;
+
 
 namespace AutoEnder
 {
     public class AutoEnderBehaviour : ModBehaviour
     {
         private bool _isActive = false;
-
-        public bool IsActive
-        {
-            get { return _isActive; }
-            set { _isActive = value; }
-        }
+        private readonly Timer _timer = new Timer(250);
 
         public override void OnActivate()
         {
+            Debug.WriteLine("Activating");
             _isActive = true;
+
+            _timer.Elapsed += UpdateProjects;
+            _timer.AutoReset = true;
+            _timer.Start();
         }
 
         public override void OnDeactivate()
         {
             _isActive = false;
+            _timer.Stop();
         }
 
-        public void Update()
+        private void UpdateProjects(object sender, ElapsedEventArgs e)
         {
-            if (_isActive
-                && GameSettings.Instance != null
-                && GameSettings.Instance.MyCompany != null
-                && GameSettings.Instance.MyCompany.WorkItems != null)
+            Console.WriteLine("Updating projects");
+
+            if (!_isActive
+                || GameSettings.Instance == null
+                || GameSettings.Instance.MyCompany == null
+                || GameSettings.Instance.MyCompany.WorkItems == null)
             {
-                /*
-                 * Continue when design phase is done
-                 */
-                IEnumerable<DesignDocument> designPhase = GameSettings.Instance.MyCompany.WorkItems.OfType<DesignDocument>();
-                foreach (DesignDocument document in designPhase)
-                {
-                    if (document.HasFinished && !document.Done)
-                    {
-                        document.PromoteAction();
-                    }
-                }
+                return;
+            }
 
-                /*
-                 * Continue when alpha phase is done
-                 */
-                IEnumerable<SoftwareAlpha> alphaPhase = GameSettings.Instance.MyCompany.WorkItems.OfType<SoftwareAlpha>();
+            SHashSet<WorkItem> workItems = GameSettings.Instance.MyCompany.WorkItems;
+            IEnumerable<DesignDocument> designDocuments = workItems.OfType<DesignDocument>().ToList();
 
-                foreach (SoftwareAlpha alpha in alphaPhase)
+            foreach (var designDocument in designDocuments)
+            {
+                if (designDocument.HasFinished && !designDocument.Done)
                 {
-                    if (alpha.HasFinished && !alpha.Done)
-                    {
-                        alpha.PromoteAction();
-                    }
+                    Debug.WriteLine("Finishing design phase");
+                    designDocument.PromoteAction();
                 }
             }
 
