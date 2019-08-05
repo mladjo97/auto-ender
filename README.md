@@ -1,4 +1,4 @@
-# auto-ender
+# auto-ender [![Build Status](https://travis-ci.org/mladjo97/auto-ender.svg?branch=master)](https://travis-ci.org/mladjo97/auto-ender)
 Mod for Software Inc. game which allows you to auto-end the design and development phase of a project.
 
 ## Description
